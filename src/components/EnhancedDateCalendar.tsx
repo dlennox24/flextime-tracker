@@ -1,18 +1,17 @@
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
-import {
-  Box,
-  Chip,
-  Container,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import Box from '@mui/material/Box';
 import type { ChipProps } from '@mui/material/Chip';
+import Chip from '@mui/material/Chip';
+import { blueGrey } from '@mui/material/colors';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
 import { PaletteColor, styled, useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs, { Dayjs } from 'dayjs';
@@ -65,7 +64,13 @@ const StyledCalendar = styled(DateCalendar)(({ theme }) => ({
       },
     },
     '.MuiPickersCalendarHeader-root': {
-      display: 'none', // 👈 hides month + arrows
+      display: 'none', // hides month + arrows
+    },
+    '.MuiPickersDay-today': {
+      background: blueGrey[700],
+      color: theme.palette.getContrastText(blueGrey[700]),
+      boxShadow: theme.shadows[6],
+      border: 'none',
     },
   },
   '& .MuiDayCalendar-header': {
@@ -168,7 +173,6 @@ function CustomDay(props: PickersDayProps & { entryMap: Record<string, DailySum>
             }}
             disableRipple
             disableTouchRipple
-            disableHighlightToday
             disableMargin
           ></PickersDay>
           <Box

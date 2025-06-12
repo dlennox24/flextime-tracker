@@ -39,7 +39,10 @@ export function sumMonthlyTime(dailySums: DailySum[]): MonthlySum[] {
   const map = new Map<string, MonthlySum>();
 
   for (const day of dailySums) {
-    const monthKey = dayjs(day.date).format('YYYY-MM-01');
+    const dayDate = dayjs(day.date);
+    if (!dayDate.isBefore(dayjs().startOf('day'))) continue; // skip today and future days
+
+    const monthKey = dayDate.format('YYYY-MM-01');
 
     if (!map.has(monthKey)) {
       map.set(monthKey, {
@@ -123,8 +126,9 @@ function sumEntriesByDay(entries: TypeTimeEntry[]): DailySum[] {
     const isWeekend = day === 'Sat' || day === 'Sun';
     const rawHours = dailyMap.get(date) ?? 0;
     const adjustedHours = isWeekend ? rawHours : rawHours - 8;
+    const dayDate = dayjs(date);
 
-    if (!isWeekend || rawHours) {
+    if ((!isWeekend && dayDate.isBefore(dayjs().startOf('day'))) || rawHours) {
       result.push({
         date,
         hours: adjustedHours,
