@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import * as XLSX from 'xlsx';
+import { StoreValuesType } from '../store/zustand';
+import { DaysOfWeekType_ddd } from '../types/Date';
 
 dayjs.extend(isSameOrBefore);
 
@@ -35,12 +37,12 @@ export interface MonthlySum {
   vacationTimeUsed: number;
 }
 
-export function sumMonthlyTime(dailySums: DailySum[]): MonthlySum[] {
+export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): MonthlySum[] {
   const map = new Map<string, MonthlySum>();
 
   for (const day of dailySums) {
     const dayDate = dayjs(day.date);
-    if (!dayDate.isBefore(dayjs().startOf('day'))) continue; // skip today and future days
+    if (!dayDate.isBefore(store.endDate.endOf('day'))) continue; // skip today and future days
 
     const monthKey = dayDate.format('YYYY-MM-01');
 
@@ -86,7 +88,7 @@ export function sumMonthlyTime(dailySums: DailySum[]): MonthlySum[] {
   return sorted;
 }
 
-function sumEntriesByDay(entries: TypeTimeEntry[]): DailySum[] {
+function sumEntriesByDay(entries: TypeTimeEntry[], store: StoreValuesType): DailySum[] {
   const vacationDays: Record<string, number> = {};
   const holidays: string[] = [];
   const dailyMap = new Map<string, number>();
@@ -94,7 +96,7 @@ function sumEntriesByDay(entries: TypeTimeEntry[]): DailySum[] {
   if (entries.length === 0) return [];
 
   let minDate = dayjs(entries[0].date);
-  let maxDate = dayjs(entries[0].date);
+  // let maxDate = dayjs(entries[0].date);
 
   // First pass: collect totals and metadata
   for (const entry of entries) {
@@ -102,7 +104,7 @@ function sumEntriesByDay(entries: TypeTimeEntry[]): DailySum[] {
     const entryDate = dayjs(entry.date);
 
     if (entryDate.isBefore(minDate)) minDate = entryDate;
-    if (entryDate.isAfter(maxDate)) maxDate = entryDate;
+    // if (entryDate.isAfter(maxDate)) maxDate = entryDate;
 
     const currentHours = dailyMap.get(dateKey) ?? 0;
     dailyMap.set(dateKey, currentHours + entry.hours);
@@ -118,14 +120,23 @@ function sumEntriesByDay(entries: TypeTimeEntry[]): DailySum[] {
   // Generate result: fill in all dates between minDate and maxDate
   const result: DailySum[] = [];
   let cursor = minDate.startOf('month');
-  const end = maxDate.endOf('month');
+  // const end = maxDate.isAfter(storeEndDate) ? maxDate.endOf('month') : storeEndDate;
 
-  while (cursor.isSameOrBefore(end)) {
+  Object.entries({
+    minDate,
+    endDate: store.endDate,
+    //maxDate,
+    //end,
+  }).forEach(([key, date]) => console.log(key, date.format('YYYY-MM-DD')));
+
+  // debugger;
+  while (cursor.isSameOrBefore(store.endDate)) {
     const date = cursor.format('YYYY-MM-DD');
-    const day = cursor.format('ddd');
-    const isWeekend = day === 'Sat' || day === 'Sun';
+    console.log(date);
+    const day = cursor.format('ddd') as DaysOfWeekType_ddd;
+    const isWeekend = store.weekends.includes(day);
     const rawHours = dailyMap.get(date) ?? 0;
-    const adjustedHours = isWeekend ? rawHours : rawHours - 8;
+    const adjustedHours = isWeekend ? rawHours : rawHours - store.workdayHours;
     const dayDate = dayjs(date);
 
     if ((!isWeekend && dayDate.isBefore(dayjs().startOf('day'))) || rawHours) {
@@ -141,13 +152,13 @@ function sumEntriesByDay(entries: TypeTimeEntry[]): DailySum[] {
     cursor = cursor.add(1, 'day');
   }
 
-  // Optional: Sort by date ascending
+  // Sort by date ascending
   result.sort((a, b) => a.date.localeCompare(b.date));
 
   return result;
 }
 
-function groupEntriesByMonthDesc(entries: DailySum[]): MonthGroup[] {
+function groupEntriesByMonthDesc(entries: DailySum[], store: StoreValuesType): MonthGroup[] {
   const map = new Map<string, DailySum[]>();
 
   for (const entry of entries) {
@@ -161,7 +172,7 @@ function groupEntriesByMonthDesc(entries: DailySum[]): MonthGroup[] {
   }
 
   // Generate monthly summaries from all daily entries
-  const monthlySummaries = sumMonthlyTime(entries);
+  const monthlySummaries = sumMonthlyTime(entries, store);
   const summaryMap = new Map(monthlySummaries.map((s) => [s.month, s]));
 
   // Construct the grouped MonthGroup[]
@@ -222,7 +233,10 @@ async function parseXlsDoc(file: File): Promise<string[][]> {
   });
 }
 
-export default async function parseTimeData(file: File): Promise<MonthGroup[]> {
+export default async function parseTimeData(
+  file: File,
+  store: StoreValuesType
+): Promise<MonthGroup[]> {
   let fileData: string[][] = [];
   try {
     fileData = await parseXlsDoc(file);
@@ -266,6 +280,6 @@ export default async function parseTimeData(file: File): Promise<MonthGroup[]> {
 
   const cleanedData = data.filter((entry) => Object.keys(entry).length > 0) as TypeTimeEntry[];
 
-  const sum = sumEntriesByDay(cleanedData);
-  return groupEntriesByMonthDesc(sum);
+  const sum = sumEntriesByDay(cleanedData, store);
+  return groupEntriesByMonthDesc(sum, store);
 }

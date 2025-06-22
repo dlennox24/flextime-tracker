@@ -1,5 +1,6 @@
 import { alpha, Box, Typography, useTheme } from '@mui/material';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { StoreValuesType, useStore } from '../store/zustand';
 import parseTimeData, { MonthGroup } from '../utils/parseTimeData';
 
 interface ExcelUploaderProps {
@@ -9,6 +10,12 @@ interface ExcelUploaderProps {
 
 export default function ExcelUploader({ onDataParsed, setIsLoading }: ExcelUploaderProps) {
   const theme = useTheme();
+  const store: StoreValuesType = {
+    endDate: useStore((s) => s.endDate),
+    weekends: useStore((s) => s.weekends),
+    workdayHours: useStore((s) => s.workdayHours),
+  };
+  const [latestFile, setLatestFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [dragValidFile, setDragValidFile] = useState(true);
 
@@ -58,10 +65,18 @@ export default function ExcelUploader({ onDataParsed, setIsLoading }: ExcelUploa
   };
 
   const processFile = async (file: File) => {
-    const data: MonthGroup[] = await parseTimeData(file);
+    setLatestFile(file);
+    const data: MonthGroup[] = await parseTimeData(file, store);
     onDataParsed(data);
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (latestFile) {
+      setIsLoading(true);
+      processFile(latestFile);
+    }
+  }, [store.endDate]);
 
   let borderColor = 'grey.400';
   let bgcolor = alpha(theme.palette.divider, 0.025);

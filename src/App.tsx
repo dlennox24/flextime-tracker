@@ -2,7 +2,10 @@ import { AppBar, Stack, Toolbar } from '@mui/material';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useState } from 'react';
+import EndDateSelector from './components/EndDateSelector';
 import InstructionsDialog from './components/InstructionsDialog';
 import ThemeModeSelector from './components/ThemeModeSelector';
 import TrackerRows from './components/TrackerRows';
@@ -55,26 +58,29 @@ export default function App() {
 
   return (
     <CustomMuiThemeProvider>
-      <AppBar position="static" color="primary">
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <AppBar position="static" color="primary">
+          <Container maxWidth="lg">
+            <Toolbar disableGutters>
+              <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                Flextime Tracker
+              </Typography>
+              <Stack direction="row" spacing={2}>
+                {isDataParsed && <UploadButton {...uploadButtonProps} />}
+                {isDataParsed && <InstructionsDialog />}
+                <ThemeModeSelector />
+              </Stack>
+            </Toolbar>
+          </Container>
+        </AppBar>
         <Container maxWidth="lg">
-          <Toolbar disableGutters>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              Flextime Tracker
-            </Typography>
-            <Stack direction="row" spacing={2}>
-              {isDataParsed && <UploadButton {...uploadButtonProps} />}
-              {isDataParsed && <InstructionsDialog />}
-              <ThemeModeSelector />
-            </Stack>
-          </Toolbar>
+          <Box sx={{ my: 4 }}>
+            <EndDateSelector />
+            <TrackerRows {...trackerRowsProps} />
+            {/* <Copyright /> */}
+          </Box>
         </Container>
-      </AppBar>
-      <Container maxWidth="lg">
-        <Box sx={{ my: 4 }}>
-          <TrackerRows {...trackerRowsProps} />
-          {/* <Copyright /> */}
-        </Box>
-      </Container>
+      </LocalizationProvider>
     </CustomMuiThemeProvider>
   );
 }

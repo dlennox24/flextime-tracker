@@ -8,8 +8,6 @@ import {
   Typography,
 } from '@mui/material';
 import Box from '@mui/material/Box';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import MdxInstructions from '../content/instructions.mdx';
 import mdxComponents from '../utils/mdxComponents';
@@ -39,27 +37,25 @@ export default function TrackerRows({
         </Box>
       </Collapse>
       <Collapse in={isDataParsed && !isLoading}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          {data.map(({ month, entries, summary }, i) => {
-            return (
-              <Accordion key={dayjs(month).format('YYYY-MM-DD')} defaultExpanded={i === 0}>
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel1-content"
-                  id="panel1-header"
-                >
-                  <Typography component="span" variant="h4">
-                    {dayjs(month).format('MMMM YYYY')}
-                  </Typography>
-                </AccordionSummary>
-                <Divider />
-                <AccordionDetails>
-                  <EnhancedDateCalendar entries={entries} month={dayjs(month)} summary={summary} />
-                </AccordionDetails>
-              </Accordion>
-            );
-          })}
-        </LocalizationProvider>
+        {data.map(({ month, entries, summary }, i) => {
+          return (
+            <Accordion key={dayjs(month).format('YYYY-MM-DD')} defaultExpanded={i === 0}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1-content"
+                id="panel1-header"
+              >
+                <Typography component="span" variant="h4">
+                  {dayjs(month).format('MMMM YYYY')}
+                </Typography>
+              </AccordionSummary>
+              <Divider />
+              <AccordionDetails>
+                <EnhancedDateCalendar entries={entries} month={dayjs(month)} summary={summary} />
+              </AccordionDetails>
+            </Accordion>
+          );
+        })}
       </Collapse>
     </Box>
   );

@@ -16,6 +16,7 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs, { Dayjs } from 'dayjs';
 import * as React from 'react';
+import { useStore } from '../store/zustand';
 import { DailySum, MonthlySum } from '../utils/parseTimeData';
 
 type ChipColor = ChipProps['color'];
@@ -262,13 +263,14 @@ export default function EnhancedDateCalendar({
   summary,
 }: EnhancedDateCalendarProps) {
   const theme = useTheme();
+  const endDate = useStore((s) => s.endDate);
   const entryMap = React.useMemo(() => getEntryMap(entries), [entries]);
   const { flextimeAccrued, flextimeUsed, vacationTimeUsed, flextimeYTD } = summary;
 
   const listItemHours = [
     {
       primaryText: `${flextimeYTD} hour${Math.abs(flextimeYTD) === 1 ? '' : 's'}`,
-      secondaryText: 'Flextime Remaining (Year to Date)',
+      secondaryText: `Flextime Remaining (Year to ${endDate.format('MMMM Do, YYYY')})`,
       color: theme.palette.info,
     },
     {
