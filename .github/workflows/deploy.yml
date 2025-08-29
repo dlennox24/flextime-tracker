@@ -3,14 +3,14 @@ name: Deploy Vite App to GitHub Pages
 on:
   push:
     branches:
-      - main  # Automatic deployment on push to main
+      - main # Automatic deployment on push to main
   workflow_dispatch: # Allows manual deployment from GitHub Actions UI
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required for GitHub Pages deployment
+      contents: write # Required for GitHub Pages deployment
 
     steps:
       - name: Checkout repository
@@ -19,15 +19,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20  # Change version as needed
+          node-version: 20 # Change version as needed
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Configure Git user
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
 
       - name: Deploy to GitHub Pages
         env:
