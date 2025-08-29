@@ -1,10 +1,8 @@
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs, { Dayjs } from 'dayjs';
-import * as React from 'react';
+import { Dayjs } from 'dayjs';
 import { useStore } from '../store/zustand';
 
 export default function EndDateSelector() {
-  const [value, setValue] = React.useState<Dayjs | null>(dayjs('2022-04-17'));
   const endDate = useStore((s) => s.endDate);
   const handleUpdateEndDate = useStore((s) => s.updateEndDate);
 
@@ -13,7 +11,11 @@ export default function EndDateSelector() {
       sx={{ mb: 2 }}
       label="End Date"
       value={endDate}
-      onChange={(newValue: Dayjs) => handleUpdateEndDate(newValue)}
+      onChange={(newValue: Dayjs | null) => {
+        if (newValue) {
+          handleUpdateEndDate(newValue);
+        }
+      }}
     />
   );
 }
