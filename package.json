@@ -1,11 +1,14 @@
 {
   "name": "flextime-tracker",
   "version": "1.0.0",
+  "homepage": "https://dlennox24.github.io/flextime-tracker/",
   "private": false,
   "type": "module",
   "scripts": {
     "start": "vite",
     "build": "tsc -b && vite build",
+    "predepoy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,6 +19,7 @@
     "@mui/material": "^7.1.1",
     "@mui/x-date-pickers": "^8.5.0",
     "dayjs": "^1.11.13",
+    "gh-pages": "^6.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "xlsx": "^0.18.5",
