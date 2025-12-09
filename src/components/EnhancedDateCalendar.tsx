@@ -249,7 +249,7 @@ const StyledListItem = ({
             </Typography>
           ),
           secondary: ({ children }) => (
-            <Typography sx={{ fontWeight: 'normal' }}>{children}</Typography>
+            <Typography sx={{ fontWeight: 'normal', whiteSpace: 'pre-line' }}>{children}</Typography>
           ),
         }}
       />
@@ -270,7 +270,7 @@ export default function EnhancedDateCalendar({
   const listItemHours = [
     {
       primaryText: `${flextimeYTD} hour${Math.abs(flextimeYTD) === 1 ? '' : 's'}`,
-      secondaryText: `Flextime Remaining (Year to ${endDate.format('MMMM Do, YYYY')})`,
+      secondaryText: `Flextime Remaining\n(Year to ${endDate.format('MMMM Do, YYYY')})`,
       color: theme.palette.info,
     },
     {
