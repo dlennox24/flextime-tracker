@@ -117,7 +117,7 @@ function CustomDay(props: PickersDayProps & { entryMap: Record<string, DailySum>
       break;
   }
 
-  let chipLabel = 'hour';
+  let chipLabel = 'hr';
   let chipPlusMinus = '';
   let chipColor: ChipColor = 'default';
   if (totalHours > 0) {
