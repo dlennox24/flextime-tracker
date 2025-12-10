@@ -8,6 +8,7 @@ import { useState } from 'react';
 import EndDateSelector from './components/EndDateSelector';
 import InstructionsDialog from './components/InstructionsDialog';
 import ThemeModeSelector from './components/ThemeModeSelector';
+import TimeEmployedSelector from './components/TimeEmployedSelector';
 import TrackerRows from './components/TrackerRows';
 import UploadButton from './components/UploadDialog';
 import CustomMuiThemeProvider from './theme/CustomMuiThemeProvider';
@@ -75,7 +76,10 @@ export default function App() {
         </AppBar>
         <Container maxWidth="lg">
           <Box sx={{ my: 4 }}>
-            <EndDateSelector />
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+              <EndDateSelector />
+              <TimeEmployedSelector />
+            </Stack>
             <TrackerRows {...trackerRowsProps} />
             {/* <Copyright /> */}
           </Box>

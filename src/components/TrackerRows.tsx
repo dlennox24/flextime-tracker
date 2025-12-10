@@ -75,11 +75,24 @@ export default function TrackerRows({
                     }}
                   >
                     {headerMetrics.map(({ label, color }) => (
-                      <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box sx={{ width: 6, height: 24, borderRadius: 1, backgroundColor: color }} />
-                        <Typography variant="subtitle1" sx={{ whiteSpace: 'nowrap', color }}>
+                      <Box
+                        key={label}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          minWidth: 230,
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ whiteSpace: 'nowrap', color, flex: 1, textAlign: 'right' }}
+                        >
                           {label}
                         </Typography>
+                        <Box
+                          sx={{ width: 6, height: 24, borderRadius: 1, backgroundColor: color }}
+                        />
                       </Box>
                     ))}
                   </Box>
