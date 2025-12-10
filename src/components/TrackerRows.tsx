@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import Box from '@mui/material/Box';
+import { lighten, useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import MdxInstructions from '../content/instructions.mdx';
 import mdxComponents from '../utils/mdxComponents';
@@ -28,6 +29,7 @@ export default function TrackerRows({
   handleSetData: (data: MonthGroup[]) => void;
   setIsLoading: (isLoading: boolean) => void;
 }) {
+  const theme = useTheme();
   return (
     <Box sx={{ width: '100%' }}>
       <Collapse in={!isDataParsed && !isLoading}>
@@ -38,6 +40,18 @@ export default function TrackerRows({
       </Collapse>
       <Collapse in={isDataParsed && !isLoading}>
         {data.map(({ month, entries, summary }, i) => {
+          const { flextimeYTD, vacationTimeRemaining } = summary;
+          const smtoRemainingColor = lighten(theme.palette.secondary.main, 0.3);
+          const headerMetrics = [
+            {
+              label: `${flextimeYTD} hrs Flextime Remaining`,
+              color: theme.palette.info.main,
+            },
+            {
+              label: `${vacationTimeRemaining} hrs SMTO Remaining`,
+              color: smtoRemainingColor,
+            },
+          ];
           return (
             <Accordion key={dayjs(month).format('YYYY-MM-DD')} defaultExpanded={i === 0}>
               <AccordionSummary
@@ -45,9 +59,28 @@ export default function TrackerRows({
                 aria-controls="panel1-content"
                 id="panel1-header"
               >
-                <Typography component="span" variant="h4">
-                  {dayjs(month).format('MMMM YYYY')}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
+                  <Typography component="span" variant="h4">
+                    {dayjs(month).format('MMMM YYYY')}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      ml: 'auto',
+                    }}
+                  >
+                    {headerMetrics.map(({ label, color }) => (
+                      <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ width: 6, height: 24, borderRadius: 1, backgroundColor: color }} />
+                        <Typography variant="subtitle1" sx={{ whiteSpace: 'nowrap', color }}>
+                          {label}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
               </AccordionSummary>
               <Divider />
               <AccordionDetails>

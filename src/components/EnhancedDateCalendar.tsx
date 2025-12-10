@@ -9,7 +9,7 @@ import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import { PaletteColor, styled, useTheme } from '@mui/material/styles';
+import { PaletteColor, lighten, styled, useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
@@ -267,6 +267,15 @@ export default function EnhancedDateCalendar({
   const entryMap = React.useMemo(() => getEntryMap(entries), [entries]);
   const { flextimeAccrued, flextimeUsed, vacationTimeUsed, flextimeYTD, vacationTimeRemaining } =
     summary;
+  const smtoRemainingColor = React.useMemo<PaletteColor>(() => {
+    const lighterMain = lighten(theme.palette.secondary.main, 0.3);
+    return {
+      ...theme.palette.secondary,
+      main: lighterMain,
+      light: lighterMain,
+      dark: lighterMain,
+    } as PaletteColor;
+  }, [theme.palette.secondary]);
 
   const listItemHours = [
     {
@@ -294,7 +303,7 @@ export default function EnhancedDateCalendar({
         Math.abs(vacationTimeRemaining) === 1 ? '' : 's'
       }`,
       secondaryText: `SMTO Time Remaining (Annual cap ${SMTO_ANNUAL_LIMIT_HOURS} hrs)`,
-      color: theme.palette.secondary,
+      color: smtoRemainingColor,
     },
   ];
 
