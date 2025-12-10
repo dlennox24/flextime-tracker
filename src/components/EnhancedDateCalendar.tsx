@@ -303,7 +303,7 @@ export default function EnhancedDateCalendar({
       primaryText: `${vacationTimeRemaining} hour${
         Math.abs(vacationTimeRemaining) === 1 ? '' : 's'
       }`,
-      secondaryText: `SMTO Time Remaining (Annual cap ${smtoAnnualLimit} hrs)`,
+      secondaryText: `SMTO Time Remaining\n(Annual cap ${smtoAnnualLimit} hrs)`,
       color: smtoRemainingColor,
     },
   ];
