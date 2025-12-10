@@ -12,6 +12,7 @@ import { lighten, useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import MdxInstructions from '../content/instructions.mdx';
 import mdxComponents from '../utils/mdxComponents';
+import { useStore } from '../store/zustand';
 import { MonthGroup } from '../utils/parseTimeData';
 import EnhancedDateCalendar from './EnhancedDateCalendar';
 import ExcelUploader from './ExcelUploader';
@@ -30,6 +31,7 @@ export default function TrackerRows({
   setIsLoading: (isLoading: boolean) => void;
 }) {
   const theme = useTheme();
+  const smtoAnnualLimit = useStore((s) => s.smtoAnnualLimitHours);
   return (
     <Box sx={{ width: '100%' }}>
       <Collapse in={!isDataParsed && !isLoading}>
@@ -40,7 +42,8 @@ export default function TrackerRows({
       </Collapse>
       <Collapse in={isDataParsed && !isLoading}>
         {data.map(({ month, entries, summary }, i) => {
-          const { flextimeYTD, vacationTimeRemaining } = summary;
+          const { flextimeYTD, vacationTimeYTD } = summary;
+          const vacationTimeRemaining = Math.max(smtoAnnualLimit - vacationTimeYTD, 0);
           const smtoRemainingColor = lighten(theme.palette.secondary.main, 0.3);
           const headerMetrics = [
             {

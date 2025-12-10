@@ -17,7 +17,7 @@ import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs, { Dayjs } from 'dayjs';
 import * as React from 'react';
 import { useStore } from '../store/zustand';
-import { DailySum, MonthlySum, SMTO_ANNUAL_LIMIT_HOURS } from '../utils/parseTimeData';
+import { DailySum, MonthlySum } from '../utils/parseTimeData';
 
 type ChipColor = ChipProps['color'];
 
@@ -264,9 +264,10 @@ export default function EnhancedDateCalendar({
 }: EnhancedDateCalendarProps) {
   const theme = useTheme();
   const endDate = useStore((s) => s.endDate);
+  const smtoAnnualLimit = useStore((s) => s.smtoAnnualLimitHours);
   const entryMap = React.useMemo(() => getEntryMap(entries), [entries]);
-  const { flextimeAccrued, flextimeUsed, vacationTimeUsed, flextimeYTD, vacationTimeRemaining } =
-    summary;
+  const { flextimeAccrued, flextimeUsed, vacationTimeUsed, flextimeYTD, vacationTimeYTD } = summary;
+  const vacationTimeRemaining = Math.max(smtoAnnualLimit - vacationTimeYTD, 0);
   const smtoRemainingColor = React.useMemo<PaletteColor>(() => {
     const lighterMain = lighten(theme.palette.secondary.main, 0.3);
     return {
@@ -302,7 +303,7 @@ export default function EnhancedDateCalendar({
       primaryText: `${vacationTimeRemaining} hour${
         Math.abs(vacationTimeRemaining) === 1 ? '' : 's'
       }`,
-      secondaryText: `SMTO Time Remaining (Annual cap ${SMTO_ANNUAL_LIMIT_HOURS} hrs)`,
+      secondaryText: `SMTO Time Remaining (Annual cap ${smtoAnnualLimit} hrs)`,
       color: smtoRemainingColor,
     },
   ];

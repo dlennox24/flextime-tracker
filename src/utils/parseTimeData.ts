@@ -6,8 +6,6 @@ import { DaysOfWeekType_ddd } from '../types/Date';
 
 dayjs.extend(isSameOrBefore);
 
-export const SMTO_ANNUAL_LIMIT_HOURS = 160;
-
 export interface TypeTimeEntry {
   id: number;
   project: string;
@@ -37,7 +35,7 @@ export interface MonthlySum {
   flextimeUsed: number;
   flextimeYTD: number;
   vacationTimeUsed: number;
-  vacationTimeRemaining: number;
+  vacationTimeYTD: number;
 }
 
 export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): MonthlySum[] {
@@ -56,7 +54,7 @@ export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): M
         flextimeUsed: 0,
         flextimeYTD: 0, // temporary, will be calculated after sorting
         vacationTimeUsed: 0,
-        vacationTimeRemaining: SMTO_ANNUAL_LIMIT_HOURS,
+        vacationTimeYTD: 0,
       });
     }
 
@@ -91,7 +89,7 @@ export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): M
 
     const prevVacationUsed = vacationUsedByYear.get(year) ?? 0;
     const newVacationUsed = prevVacationUsed + month.vacationTimeUsed;
-    month.vacationTimeRemaining = Math.max(SMTO_ANNUAL_LIMIT_HOURS - newVacationUsed, 0);
+    month.vacationTimeYTD = newVacationUsed;
     vacationUsedByYear.set(year, newVacationUsed);
   }
 
@@ -200,7 +198,7 @@ function groupEntriesByMonthDesc(entries: DailySum[], store: StoreValuesType): M
         flextimeUsed: 0,
         vacationTimeUsed: 0,
         flextimeYTD: 0,
-        vacationTimeRemaining: SMTO_ANNUAL_LIMIT_HOURS,
+        vacationTimeYTD: 0,
       },
     });
   }
