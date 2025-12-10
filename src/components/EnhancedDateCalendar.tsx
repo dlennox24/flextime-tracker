@@ -72,6 +72,10 @@ const StyledCalendar = styled(DateCalendar)(({ theme }) => ({
       color: theme.palette.getContrastText(blueGrey[700]),
       boxShadow: theme.shadows[6],
       border: 'none',
+      '&:hover, &:focus': {
+        background: theme.palette.info[theme.palette.mode],
+        color: theme.palette.getContrastText(theme.palette.info[theme.palette.mode]),
+      },
     },
   },
   '& .MuiDayCalendar-header': {
