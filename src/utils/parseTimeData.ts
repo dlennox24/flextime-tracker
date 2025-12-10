@@ -6,6 +6,8 @@ import { DaysOfWeekType_ddd } from '../types/Date';
 
 dayjs.extend(isSameOrBefore);
 
+export const SMTO_ANNUAL_LIMIT_HOURS = 160;
+
 export interface TypeTimeEntry {
   id: number;
   project: string;
@@ -35,6 +37,7 @@ export interface MonthlySum {
   flextimeUsed: number;
   flextimeYTD: number;
   vacationTimeUsed: number;
+  vacationTimeRemaining: number;
 }
 
 export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): MonthlySum[] {
@@ -53,6 +56,7 @@ export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): M
         flextimeUsed: 0,
         flextimeYTD: 0, // temporary, will be calculated after sorting
         vacationTimeUsed: 0,
+        vacationTimeRemaining: SMTO_ANNUAL_LIMIT_HOURS,
       });
     }
 
@@ -74,15 +78,21 @@ export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): M
   const sorted = Array.from(map.values()).sort((a, b) => a.month.localeCompare(b.month));
 
   // Compute cumulative flextimeYTD (accrued - used)
-  let ytdByYear = new Map<string, number>();
+  const flexYTDByYear = new Map<string, number>();
+  const vacationUsedByYear = new Map<string, number>();
 
   for (const month of sorted) {
     const year = month.month.slice(0, 4);
-    const prevYTD = ytdByYear.get(year) ?? 0;
+    const prevYTD = flexYTDByYear.get(year) ?? 0;
     const netFlex = month.flextimeAccrued - month.flextimeUsed;
     const newYTD = prevYTD + netFlex;
     month.flextimeYTD = newYTD;
-    ytdByYear.set(year, newYTD);
+    flexYTDByYear.set(year, newYTD);
+
+    const prevVacationUsed = vacationUsedByYear.get(year) ?? 0;
+    const newVacationUsed = prevVacationUsed + month.vacationTimeUsed;
+    month.vacationTimeRemaining = Math.max(SMTO_ANNUAL_LIMIT_HOURS - newVacationUsed, 0);
+    vacationUsedByYear.set(year, newVacationUsed);
   }
 
   return sorted;
@@ -190,6 +200,7 @@ function groupEntriesByMonthDesc(entries: DailySum[], store: StoreValuesType): M
         flextimeUsed: 0,
         vacationTimeUsed: 0,
         flextimeYTD: 0,
+        vacationTimeRemaining: SMTO_ANNUAL_LIMIT_HOURS,
       },
     });
   }

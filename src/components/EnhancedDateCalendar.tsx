@@ -17,7 +17,7 @@ import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs, { Dayjs } from 'dayjs';
 import * as React from 'react';
 import { useStore } from '../store/zustand';
-import { DailySum, MonthlySum } from '../utils/parseTimeData';
+import { DailySum, MonthlySum, SMTO_ANNUAL_LIMIT_HOURS } from '../utils/parseTimeData';
 
 type ChipColor = ChipProps['color'];
 
@@ -265,7 +265,8 @@ export default function EnhancedDateCalendar({
   const theme = useTheme();
   const endDate = useStore((s) => s.endDate);
   const entryMap = React.useMemo(() => getEntryMap(entries), [entries]);
-  const { flextimeAccrued, flextimeUsed, vacationTimeUsed, flextimeYTD } = summary;
+  const { flextimeAccrued, flextimeUsed, vacationTimeUsed, flextimeYTD, vacationTimeRemaining } =
+    summary;
 
   const listItemHours = [
     {
@@ -286,6 +287,13 @@ export default function EnhancedDateCalendar({
     {
       primaryText: `${vacationTimeUsed} hour${Math.abs(vacationTimeUsed) === 1 ? '' : 's'}`,
       secondaryText: 'SMTO Time Used',
+      color: theme.palette.secondary,
+    },
+    {
+      primaryText: `${vacationTimeRemaining} hour${
+        Math.abs(vacationTimeRemaining) === 1 ? '' : 's'
+      }`,
+      secondaryText: `SMTO Time Remaining (Annual cap ${SMTO_ANNUAL_LIMIT_HOURS} hrs)`,
       color: theme.palette.secondary,
     },
   ];
