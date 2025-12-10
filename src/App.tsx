@@ -10,28 +10,9 @@ import InstructionsDialog from './components/InstructionsDialog';
 import ThemeModeSelector from './components/ThemeModeSelector';
 import TimeEmployedSelector from './components/TimeEmployedSelector';
 import TrackerRows from './components/TrackerRows';
-import UploadButton from './components/UploadDialog';
+import UploadDialog from './components/UploadDialog';
 import CustomMuiThemeProvider from './theme/CustomMuiThemeProvider';
 import { MonthGroup } from './utils/parseTimeData';
-
-// function Copyright() {
-//   return (
-//     <Typography
-//       variant="body2"
-//       align="center"
-//       sx={{
-//         color: 'text.secondary',
-//         mt: 4,
-//       }}
-//     >
-//       {'Copyright © '}
-//       <Link color="inherit" href="https://mui.com/">
-//         Your Website
-//       </Link>{' '}
-//       {new Date().getFullYear()}.
-//     </Typography>
-//   );
-// }
 
 export default function App() {
   const [data, setData] = useState<MonthGroup[]>([]);
@@ -67,7 +48,7 @@ export default function App() {
                 Flextime Tracker
               </Typography>
               <Stack direction="row" spacing={2}>
-                {isDataParsed && <UploadButton {...uploadButtonProps} />}
+                {isDataParsed && <UploadDialog {...uploadButtonProps} />}
                 {isDataParsed && <InstructionsDialog />}
                 <ThemeModeSelector />
               </Stack>
@@ -81,7 +62,6 @@ export default function App() {
               <TimeEmployedSelector />
             </Stack>
             <TrackerRows {...trackerRowsProps} />
-            {/* <Copyright /> */}
           </Box>
         </Container>
       </LocalizationProvider>
