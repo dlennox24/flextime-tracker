@@ -45,10 +45,11 @@ export default function TrackerRows({
           const { flextimeYTD, vacationTimeYTD } = summary;
           const vacationTimeRemaining = Math.max(smtoAnnualLimit - vacationTimeYTD, 0);
           const smtoRemainingColor = lighten(theme.palette.secondary.main, 0.3);
+          const flextimeColor = theme.palette.info[theme.palette.mode];
           const headerMetrics = [
             {
               label: `${flextimeYTD} hrs Flextime Remaining`,
-              color: theme.palette.info.main,
+              color: flextimeColor,
             },
             {
               label: `${vacationTimeRemaining} hrs SMTO Remaining`,
