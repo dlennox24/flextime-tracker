@@ -6,6 +6,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useState } from 'react';
 import EndDateSelector from './components/EndDateSelector';
+import Footer from './components/Footer';
 import InstructionsDialog from './components/InstructionsDialog';
 import ThemeModeSelector from './components/ThemeModeSelector';
 import TimeEmployedSelector from './components/TimeEmployedSelector';
@@ -64,6 +65,7 @@ export default function App() {
             <TrackerRows {...trackerRowsProps} />
           </Box>
         </Container>
+        <Footer />
       </LocalizationProvider>
     </CustomMuiThemeProvider>
   );
