@@ -215,7 +215,7 @@ function CustomDay(props: PickersDayProps & { entryMap: Record<string, DailySum>
           disableGutters
           sx={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}
         >
-          {(totalHours || totalHours === 0) && (
+          {totalHours !== undefined && (
             <Chip
               label={`${chipPlusMinus}${totalHours} ${chipLabel}`}
               color={chipColor}

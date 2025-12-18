@@ -135,7 +135,7 @@ function sumEntriesByDay(entries: TypeTimeEntry[], store: StoreValuesType): Dail
     const adjustedHours = isWeekend ? rawHours : rawHours - store.workdayHours;
     const dayDate = dayjs(date);
 
-    if ((!isWeekend && dayDate.isBefore(dayjs().startOf('day'))) || rawHours) {
+    if (!isWeekend || rawHours) {
       result.push({
         date,
         hours: adjustedHours,
