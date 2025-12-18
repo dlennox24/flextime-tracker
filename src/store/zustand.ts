@@ -2,11 +2,11 @@ import dayjs, { Dayjs } from 'dayjs';
 import { create } from 'zustand';
 import { DaysOfWeekType_ddd } from '../types/Date';
 
-export type SmtoLimitOption = 'less-than-one-year' | 'more-than-one-year';
+export type SmtoLimitOption = 'less-than-three-year' | 'more-than-three-year';
 
 const smtoLimitHoursByOption: Record<SmtoLimitOption, number> = {
-  'less-than-one-year': 80,
-  'more-than-one-year': 168,
+  'less-than-three-year': 128,
+  'more-than-three-year': 168,
 };
 
 export type StoreValuesType = {
@@ -26,7 +26,7 @@ export type StoreFunctionsType = {
 export type StoreType = StoreValuesType & StoreFunctionsType;
 
 const currentDate = dayjs();
-const defaultSmtoOption: SmtoLimitOption = 'less-than-one-year';
+const defaultSmtoOption: SmtoLimitOption = 'less-than-three-year';
 
 export const useStore = create<StoreType>((set) => ({
   workdayHours: 8,
@@ -44,6 +44,6 @@ export const useStore = create<StoreType>((set) => ({
 }));
 
 export const smtoLimitOptions = [
-  { label: 'Less than one year', value: 'less-than-one-year' as const, hours: 80 },
-  { label: 'More than one year', value: 'more-than-one-year' as const, hours: 168 },
+  { label: 'Less than 3 years', value: 'less-than-three-year' as const, hours: 128 },
+  { label: 'More than 3 years', value: 'more-than-three-year' as const, hours: 168 },
 ];
