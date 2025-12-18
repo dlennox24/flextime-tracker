@@ -9,7 +9,7 @@ import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import { PaletteColor, styled, useTheme } from '@mui/material/styles';
+import { PaletteColor, lighten, styled, useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
@@ -72,6 +72,10 @@ const StyledCalendar = styled(DateCalendar)(({ theme }) => ({
       color: theme.palette.getContrastText(blueGrey[700]),
       boxShadow: theme.shadows[6],
       border: 'none',
+      '&:hover, &:focus': {
+        background: theme.palette.info[theme.palette.mode],
+        color: theme.palette.getContrastText(theme.palette.info[theme.palette.mode]),
+      },
     },
   },
   '& .MuiDayCalendar-header': {
@@ -117,7 +121,7 @@ function CustomDay(props: PickersDayProps & { entryMap: Record<string, DailySum>
       break;
   }
 
-  let chipLabel = 'hour';
+  let chipLabel = 'hr';
   let chipPlusMinus = '';
   let chipColor: ChipColor = 'default';
   if (totalHours > 0) {
@@ -211,7 +215,7 @@ function CustomDay(props: PickersDayProps & { entryMap: Record<string, DailySum>
           disableGutters
           sx={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}
         >
-          {(totalHours || totalHours === 0) && (
+          {totalHours !== undefined && (
             <Chip
               label={`${chipPlusMinus}${totalHours} ${chipLabel}`}
               color={chipColor}
@@ -249,7 +253,7 @@ const StyledListItem = ({
             </Typography>
           ),
           secondary: ({ children }) => (
-            <Typography sx={{ fontWeight: 'normal' }}>{children}</Typography>
+            <Typography sx={{ fontWeight: 'normal', whiteSpace: 'pre-line' }}>{children}</Typography>
           ),
         }}
       />
@@ -264,13 +268,24 @@ export default function EnhancedDateCalendar({
 }: EnhancedDateCalendarProps) {
   const theme = useTheme();
   const endDate = useStore((s) => s.endDate);
+  const smtoAnnualLimit = useStore((s) => s.smtoAnnualLimitHours);
   const entryMap = React.useMemo(() => getEntryMap(entries), [entries]);
-  const { flextimeAccrued, flextimeUsed, vacationTimeUsed, flextimeYTD } = summary;
+  const { flextimeAccrued, flextimeUsed, vacationTimeUsed, flextimeYTD, vacationTimeYTD } = summary;
+  const vacationTimeRemaining = Math.max(smtoAnnualLimit - vacationTimeYTD, 0);
+  const smtoRemainingColor = React.useMemo<PaletteColor>(() => {
+    const lighterMain = lighten(theme.palette.secondary.main, 0.3);
+    return {
+      ...theme.palette.secondary,
+      main: lighterMain,
+      light: lighterMain,
+      dark: lighterMain,
+    } as PaletteColor;
+  }, [theme.palette.secondary]);
 
   const listItemHours = [
     {
       primaryText: `${flextimeYTD} hour${Math.abs(flextimeYTD) === 1 ? '' : 's'}`,
-      secondaryText: `Flextime Remaining (Year to ${endDate.format('MMMM Do, YYYY')})`,
+      secondaryText: `Flextime Remaining\n(Year to ${endDate.format('MMMM Do, YYYY')})`,
       color: theme.palette.info,
     },
     {
@@ -287,6 +302,13 @@ export default function EnhancedDateCalendar({
       primaryText: `${vacationTimeUsed} hour${Math.abs(vacationTimeUsed) === 1 ? '' : 's'}`,
       secondaryText: 'SMTO Time Used',
       color: theme.palette.secondary,
+    },
+    {
+      primaryText: `${vacationTimeRemaining} hour${
+        Math.abs(vacationTimeRemaining) === 1 ? '' : 's'
+      }`,
+      secondaryText: `SMTO Time Remaining\n(Annual cap ${smtoAnnualLimit} hrs)`,
+      color: smtoRemainingColor,
     },
   ];
 

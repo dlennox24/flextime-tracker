@@ -1,6 +1,6 @@
 import { alpha, Box, Typography, useTheme } from '@mui/material';
-import React, { useCallback, useEffect, useState } from 'react';
-import { StoreValuesType, useStore } from '../store/zustand';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useStore } from '../store/zustand';
 import parseTimeData, { MonthGroup } from '../utils/parseTimeData';
 
 interface ExcelUploaderProps {
@@ -10,24 +10,73 @@ interface ExcelUploaderProps {
 
 export default function ExcelUploader({ onDataParsed, setIsLoading }: ExcelUploaderProps) {
   const theme = useTheme();
-  const store: StoreValuesType = {
-    endDate: useStore((s) => s.endDate),
-    weekends: useStore((s) => s.weekends),
-    workdayHours: useStore((s) => s.workdayHours),
-  };
+  const endDate = useStore((s) => s.endDate);
+  const weekends = useStore((s) => s.weekends);
+  const workdayHours = useStore((s) => s.workdayHours);
+  const smtoLimitOption = useStore((s) => s.smtoLimitOption);
+  const smtoAnnualLimitHours = useStore((s) => s.smtoAnnualLimitHours);
+
   const [latestFile, setLatestFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [dragValidFile, setDragValidFile] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+  // Use ref to track if initial file has been processed
+  const isInitialMount = useRef(true);
+
+  // Re-parse file when endDate changes (but not on initial mount)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (!latestFile) return;
+
+    const store = { endDate, weekends, workdayHours, smtoLimitOption, smtoAnnualLimitHours };
+
+    const reparse = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data: MonthGroup[] = await parseTimeData(latestFile, store);
+        onDataParsed(data);
+      } catch (err) {
+        console.error('Failed to parse file:', err);
+        setError(err instanceof Error ? err.message : 'Failed to parse file');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    reparse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [endDate]);
+
+  const processFile = async (file: File) => {
+    const store = { endDate, weekends, workdayHours, smtoLimitOption, smtoAnnualLimitHours };
+    try {
+      setError(null);
+      setIsLoading(true);
+      const data: MonthGroup[] = await parseTimeData(file, store);
+      setLatestFile(file);
+      onDataParsed(data);
+    } catch (err) {
+      console.error('Failed to parse file:', err);
+      setError(err instanceof Error ? err.message : 'Failed to parse file');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragActive(false);
     const file = event.dataTransfer.files?.[0];
     if (file) {
-      setIsLoading(true);
       processFile(file);
     }
-  }, []);
+  };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -59,24 +108,9 @@ export default function ExcelUploader({ onDataParsed, setIsLoading }: ExcelUploa
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setIsLoading(true);
       processFile(file);
     }
   };
-
-  const processFile = async (file: File) => {
-    setLatestFile(file);
-    const data: MonthGroup[] = await parseTimeData(file, store);
-    onDataParsed(data);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    if (latestFile) {
-      setIsLoading(true);
-      processFile(latestFile);
-    }
-  }, [store.endDate]);
 
   let borderColor = 'grey.400';
   let bgcolor = alpha(theme.palette.divider, 0.025);
@@ -126,16 +160,29 @@ export default function ExcelUploader({ onDataParsed, setIsLoading }: ExcelUploa
             Invalid file type
           </Typography>
           <Typography variant="body2" sx={{ color: theme.palette.error.main }}>
-            Only .xls/.xlsx files are support
+            Only .xls/.xlsx files are supported
           </Typography>
         </>
       )}
-      {!dragActive && (
+      {!dragActive && !error && (
         <>
           <Typography component="p" variant="h5" mb={2}>
             Drag and Drop your .xls/.xlsx file here
           </Typography>
           <Typography variant="body2">or click to select a file</Typography>
+        </>
+      )}
+      {!dragActive && error && (
+        <>
+          <Typography component="p" variant="h5" mb={2} sx={{ color: theme.palette.error.main }}>
+            Error parsing file
+          </Typography>
+          <Typography variant="body2" sx={{ color: theme.palette.error.main }}>
+            {error}
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Click to try another file
+          </Typography>
         </>
       )}
       <input id="file-input" type="file" accept=".xls,.xlsx" hidden onChange={handleFileInput} />

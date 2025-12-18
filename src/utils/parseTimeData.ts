@@ -35,6 +35,7 @@ export interface MonthlySum {
   flextimeUsed: number;
   flextimeYTD: number;
   vacationTimeUsed: number;
+  vacationTimeYTD: number;
 }
 
 export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): MonthlySum[] {
@@ -53,6 +54,7 @@ export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): M
         flextimeUsed: 0,
         flextimeYTD: 0, // temporary, will be calculated after sorting
         vacationTimeUsed: 0,
+        vacationTimeYTD: 0,
       });
     }
 
@@ -74,15 +76,21 @@ export function sumMonthlyTime(dailySums: DailySum[], store: StoreValuesType): M
   const sorted = Array.from(map.values()).sort((a, b) => a.month.localeCompare(b.month));
 
   // Compute cumulative flextimeYTD (accrued - used)
-  let ytdByYear = new Map<string, number>();
+  const flexYTDByYear = new Map<string, number>();
+  const vacationUsedByYear = new Map<string, number>();
 
   for (const month of sorted) {
     const year = month.month.slice(0, 4);
-    const prevYTD = ytdByYear.get(year) ?? 0;
+    const prevYTD = flexYTDByYear.get(year) ?? 0;
     const netFlex = month.flextimeAccrued - month.flextimeUsed;
     const newYTD = prevYTD + netFlex;
     month.flextimeYTD = newYTD;
-    ytdByYear.set(year, newYTD);
+    flexYTDByYear.set(year, newYTD);
+
+    const prevVacationUsed = vacationUsedByYear.get(year) ?? 0;
+    const newVacationUsed = prevVacationUsed + month.vacationTimeUsed;
+    month.vacationTimeYTD = newVacationUsed;
+    vacationUsedByYear.set(year, newVacationUsed);
   }
 
   return sorted;
@@ -96,7 +104,6 @@ function sumEntriesByDay(entries: TypeTimeEntry[], store: StoreValuesType): Dail
   if (entries.length === 0) return [];
 
   let minDate = dayjs(entries[0].date);
-  // let maxDate = dayjs(entries[0].date);
 
   // First pass: collect totals and metadata
   for (const entry of entries) {
@@ -104,12 +111,11 @@ function sumEntriesByDay(entries: TypeTimeEntry[], store: StoreValuesType): Dail
     const entryDate = dayjs(entry.date);
 
     if (entryDate.isBefore(minDate)) minDate = entryDate;
-    // if (entryDate.isAfter(maxDate)) maxDate = entryDate;
 
     const currentHours = dailyMap.get(dateKey) ?? 0;
     dailyMap.set(dateKey, currentHours + entry.hours);
 
-    if (!Object.keys(vacationDays).includes(dateKey) && entry.laborCode.includes('SMTO')) {
+    if (!(dateKey in vacationDays) && entry.laborCode.includes('SMTO')) {
       vacationDays[dateKey] = entry.hours;
     }
     if (!holidays.includes(dateKey) && entry.laborCode.includes('Holiday')) {
@@ -120,30 +126,20 @@ function sumEntriesByDay(entries: TypeTimeEntry[], store: StoreValuesType): Dail
   // Generate result: fill in all dates between minDate and maxDate
   const result: DailySum[] = [];
   let cursor = minDate.startOf('month');
-  // const end = maxDate.isAfter(storeEndDate) ? maxDate.endOf('month') : storeEndDate;
 
-  Object.entries({
-    minDate,
-    endDate: store.endDate,
-    //maxDate,
-    //end,
-  }).forEach(([key, date]) => console.log(key, date.format('YYYY-MM-DD')));
-
-  // debugger;
   while (cursor.isSameOrBefore(store.endDate)) {
     const date = cursor.format('YYYY-MM-DD');
-    console.log(date);
     const day = cursor.format('ddd') as DaysOfWeekType_ddd;
     const isWeekend = store.weekends.includes(day);
     const rawHours = dailyMap.get(date) ?? 0;
     const adjustedHours = isWeekend ? rawHours : rawHours - store.workdayHours;
     const dayDate = dayjs(date);
 
-    if ((!isWeekend && dayDate.isBefore(dayjs().startOf('day'))) || rawHours) {
+    if (!isWeekend || rawHours) {
       result.push({
         date,
         hours: adjustedHours,
-        isVacationDay: Object.keys(vacationDays).includes(date),
+        isVacationDay: date in vacationDays,
         vacationHours: vacationDays[date] ?? 0,
         isHoliday: holidays.includes(date),
       });
@@ -190,6 +186,7 @@ function groupEntriesByMonthDesc(entries: DailySum[], store: StoreValuesType): M
         flextimeUsed: 0,
         vacationTimeUsed: 0,
         flextimeYTD: 0,
+        vacationTimeYTD: 0,
       },
     });
   }

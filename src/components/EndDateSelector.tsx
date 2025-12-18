@@ -1,4 +1,4 @@
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { Dayjs } from 'dayjs';
 import { useStore } from '../store/zustand';
 
@@ -7,8 +7,8 @@ export default function EndDateSelector() {
   const handleUpdateEndDate = useStore((s) => s.updateEndDate);
 
   return (
-    <DatePicker
-      sx={{ mb: 2 }}
+    <DesktopDatePicker
+      sx={{ maxWidth: 160 }}
       label="End Date"
       value={endDate}
       onChange={(newValue: Dayjs | null) => {

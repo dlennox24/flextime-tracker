@@ -6,31 +6,14 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useState } from 'react';
 import EndDateSelector from './components/EndDateSelector';
+import Footer from './components/Footer';
 import InstructionsDialog from './components/InstructionsDialog';
 import ThemeModeSelector from './components/ThemeModeSelector';
+import TimeEmployedSelector from './components/TimeEmployedSelector';
 import TrackerRows from './components/TrackerRows';
-import UploadButton from './components/UploadDialog';
+import UploadDialog from './components/UploadDialog';
 import CustomMuiThemeProvider from './theme/CustomMuiThemeProvider';
 import { MonthGroup } from './utils/parseTimeData';
-
-// function Copyright() {
-//   return (
-//     <Typography
-//       variant="body2"
-//       align="center"
-//       sx={{
-//         color: 'text.secondary',
-//         mt: 4,
-//       }}
-//     >
-//       {'Copyright © '}
-//       <Link color="inherit" href="https://mui.com/">
-//         Your Website
-//       </Link>{' '}
-//       {new Date().getFullYear()}.
-//     </Typography>
-//   );
-// }
 
 export default function App() {
   const [data, setData] = useState<MonthGroup[]>([]);
@@ -66,7 +49,7 @@ export default function App() {
                 Flextime Tracker
               </Typography>
               <Stack direction="row" spacing={2}>
-                {isDataParsed && <UploadButton {...uploadButtonProps} />}
+                {isDataParsed && <UploadDialog {...uploadButtonProps} />}
                 {isDataParsed && <InstructionsDialog />}
                 <ThemeModeSelector />
               </Stack>
@@ -75,11 +58,14 @@ export default function App() {
         </AppBar>
         <Container maxWidth="lg">
           <Box sx={{ my: 4 }}>
-            <EndDateSelector />
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+              <EndDateSelector />
+              <TimeEmployedSelector />
+            </Stack>
             <TrackerRows {...trackerRowsProps} />
-            {/* <Copyright /> */}
           </Box>
         </Container>
+        <Footer />
       </LocalizationProvider>
     </CustomMuiThemeProvider>
   );
