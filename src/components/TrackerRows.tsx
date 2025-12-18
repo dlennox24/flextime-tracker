@@ -83,6 +83,7 @@ export default function TrackerRows({
                           alignItems: 'center',
                           gap: 1,
                           minWidth: 230,
+                          pr: 1.875,
                         }}
                       >
                         <Typography
