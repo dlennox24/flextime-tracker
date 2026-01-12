@@ -16,7 +16,7 @@
     "@emotion/styled": "^11.14.0",
     "@mdx-js/react": "^3.1.0",
     "@mui/icons-material": "^7.3.6",
-    "@mui/material": "^7.3.6",
+    "@mui/material": "^7.3.7",
     "@mui/x-date-pickers": "^8.22.1",
     "dayjs": "^1.11.19",
     "gh-pages": "^6.3.0",
